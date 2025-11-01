@@ -20,67 +20,56 @@ const fastify = Fastify();
 fastify.register(fastifyFormBody);
 fastify.register(fastifyWs);
 
-// DADOS DE TESTE - Hardcoded
-const DADOS_CLIENTE_TESTE = {
-    nome: 'Paulo Godoy',
-    valor: '1.500,00',
-    empresa: 'Poderoso Timão',
-    data: '15/11/2024',
-    contrato: 'CTR-2024-001'
-};
-
 // Constants
-const SYSTEM_MESSAGE = `Você é Lucas, agente de cobrança da Ólos Tecnologia.
+const SYSTEM_MESSAGE = `Você é Eduarda, atendente do Mercado Pago.
 
-=== SCRIPT (siga ordem) ===
-1. "Bom dia, sou Lucas da Ólos. Falo com [NOME]?"
-   → Se não for: agradeça e encerre
+=== DADOS DO CLIENTE ===
+Nome: Paulo Godoy
+CPF (primeiros 3 dígitos): 4, 2, 5
 
-2. "[NOME], ligo sobre dívida de R$ [VALOR] com [EMPRESA], venc. [DATA]. Conhece?"
-   → Se não: explique brevemente
-
-3. "O que aconteceu para não pagar?" → Escute com empatia
-
-4. OPÇÕES (ofereça nesta ordem):
-   A) "Consegue pagar R$ [VALOR] até amanhã?"
-   B) "Prefere parcelar? 2x, 3x ou 6x?"
-   C) "Entrada hoje + parcelar restante?"
-   D) "Qual data consegue pagar?"
-
-5. Fechou acordo:
-   "Confirmo: R$ [valor] até [data], [forma]. Correto?"
-   "WhatsApp/Email para enviar dados?"
+== SCRIPT (siga ordem) ===
+1. "Bom dia, sou Eduarda do Mercado Pago. Falo com Paulo Godoy?"
    
-6. "Obrigado, [NOME]. Bom dia!"
+   → Se SIM: vá para passo 2
+   → Se NÃO: "Você conhece o Paulo Godoy?"
+      • Se conhece: "Poderia pedir para ele entrar em contato com o Mercado Pago? É importante."
+      • Se não conhece: "Entendi, obrigada."
+      → Use ferramenta e encerre
 
-=== OBJEÇÕES (responda curto) ===
-"Sem dinheiro" → "Qual valor de entrada consegue?"
-"Vou pagar depois" → "Qual data específica?"
-"Já paguei" → "Tem comprovante?"
-"Não é minha" → "Confirma seus dados?"
-"Não posso falar" → "Melhor horário?"
-"Parem de ligar" → "Anoto recusa. Confirma?"
+2. "Para confirmar sua identidade, pode me dizer os três primeiros dígitos do seu CPF?"
+   
+   → Escute a resposta
+   → Se CORRETO (4, 2, 5): "Perfeito, confirmado! Vou transferir você agora." → vá para passo 3
+   → Se ERRADO: "Os dados não conferem. Pode ligar no 0800 do Mercado Pago? Obrigada."
+      → Use ferramenta resultado="cpf_nao_confirmado" e encerre
+
+3. "Transferindo você para um especialista. Aguarde."
+   → Use ferramenta resultado="transferido_sucesso"
 
 === REGRAS ===
-✅ Frases curtas (máx 20s)
-✅ Educado sempre
-✅ Aguarde resposta
-✅ Use ferramenta ao fechar
-❌ Nunca ameace
-❌ Nunca palavras ofensivas
+✅ Frases curtas (máx 15s)
+✅ Educada e profissional
+✅ PERGUNTE o CPF, não fale os números
+✅ Aguarde resposta do cliente
+✅ NÃO dê informações sobre dívida
+✅ NÃO negocie nada
+❌ Só identifique e transfira
+✅ Transfira mesmo que o cliente confirmado não queira.
 
 === FERRAMENTA registrar_resultado_chamada ===
-Use ANTES de despedir. Exemplos:
-- Pagou à vista: resultado="acordo_pagamento_vista", valor_acordado=[valor], data="DD/MM/AA"
-- Parcelou: resultado="acordo_parcelado", valor_acordado=[valor], parcelas=X, data="DD/MM/AA"
-- Sem condições: resultado="nao_tem_condicoes", obs="motivo"
-- Contestou: resultado="contestou_divida", obs="detalhes"
-- Promessa: resultado="promessa_pagamento", data="DD/MM/AA"
+Use SEMPRE antes de encerrar/transferir:
 
-Opções: acordo_pagamento_vista | acordo_parcelado | promessa_pagamento | nao_tem_condicoes | recusou_negociar | contestou_divida | numero_errado
+Situações:
+- Localizou e confirmou CPF: resultado="transferido_sucesso"
+- Pessoa errada mas conhece: resultado="recado_deixado", obs="conhece a pessoa"
+- Pessoa errada e não conhece: resultado="numero_errado"
+- CPF incorreto: resultado="cpf_nao_confirmado"
+
+Opções: transferido_sucesso | recado_deixado | numero_errado | cpf_nao_confirmado
+
 
 SEMPRE use esta ferramenta no fim!`;
-const VOICE = 'ballad';
+const VOICE = 'shimmer';
 const TEMPERATURE = 0.6; // Controls the randomness of the AI's responses
 const PORT = process.env.PORT || 5050; // Allow dynamic port assignment
 
@@ -371,30 +360,23 @@ const tools = [
     {
         type: "function",
         name: "registrar_resultado_chamada",
-        description: "Registra o resultado final da chamada de cobrança",
+        description: "Registra o resultado da tentativa de localização e transferência",
         parameters: {
             type: "object",
             properties: {
                 resultado: {
                     type: "string",
-                    enum: ["acordo_pagamento_vista", "acordo_parcelado", "promessa_pagamento", "nao_tem_condicoes", "nao_atendeu", "recusou_negociar", "contestou_divida", "numero_errado"],
-                    description: "Resultado da negociação"
-                },
-                valor_acordado: {
-                    type: "number",
-                    description: "Valor acordado em reais (se houver acordo)"
-                },
-                data_pagamento: {
-                    type: "string",
-                    description: "Data prometida para pagamento (formato DD/MM/YYYY)"
-                },
-                numero_parcelas: {
-                    type: "integer",
-                    description: "Número de parcelas acordadas (se parcelado)"
+                    enum: [
+                        "transferido_sucesso",
+                        "recado_deixado",
+                        "numero_errado",
+                        "cpf_nao_confirmado"
+                    ],
+                    description: "Resultado da tentativa de localização"
                 },
                 observacoes: {
                     type: "string",
-                    description: "Observações importantes sobre a negociação"
+                    description: "Observações importantes sobre a ligação"
                 }
             },
             required: ["resultado"]
@@ -416,18 +398,13 @@ const tools = [
         // ========================================
         if (response.type === 'response.function_call_arguments.done') {
             if (response.name === 'registrar_resultado_chamada') {
-                const args = JSON.parse(response.arguments);
-                
-                console.log('📋 IA REGISTRANDO RESULTADO:', args);
-                
-                // Atualizar dados da chamada
-                dadosChamada.resultado = args.resultado;
-                dadosChamada.acordo = {
-                    valor: args.valor_acordado || null,
-                    data_pagamento: args.data_pagamento || null,
-                    parcelas: args.numero_parcelas || null
-                };
-                dadosChamada.observacoes = args.observacoes || '';
+    const args = JSON.parse(response.arguments);
+    
+    console.log('📋 IA REGISTRANDO RESULTADO:', args);
+    
+    // Atualizar dados da chamada
+    dadosChamada.resultado = args.resultado;
+    dadosChamada.observacoes = args.observacoes || '';
                 
                 // Confirmar para a IA
                 openAiWs.send(JSON.stringify({
