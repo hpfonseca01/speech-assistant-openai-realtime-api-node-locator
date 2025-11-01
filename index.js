@@ -256,7 +256,7 @@ fastify.register(async (fastify) => {
         let markQueue = [];
         let responseStartTimestampTwilio = null;
 
-        const openAiWs = new WebSocket(`wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01&temperature=${TEMPERATURE}`, {
+        const openAiWs = new WebSocket(`wss://api.openai.com/v1/realtime?model=gpt-4o-mini-realtime-preview-2024-12-17&temperature=${TEMPERATURE}`, {
             headers: {
                 Authorization: `Bearer ${OPENAI_API_KEY}`,
             }
@@ -268,7 +268,7 @@ fastify.register(async (fastify) => {
                 type: 'session.update',
                 session: {
                     type: 'realtime',
-                    model: "gpt-4o-realtime-preview-2024-10-01",
+                    model: "gpt-4o-mini-realtime-preview-2024-12-17",
                     output_modalities: ["audio"],
                     audio: {
                         input: { format: { type: 'audio/pcmu' }, turn_detection: { type: "server_vad" } },
