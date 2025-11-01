@@ -114,10 +114,7 @@ function salvarTabulacao(dados) {
     console.log('');
     console.log('📋 DADOS DO CLIENTE:');
     console.log('   👤 Nome:', dados.cliente.nome);
-    console.log('   💰 Valor da dívida: R$', dados.cliente.valor_divida);
-    console.log('   🏢 Empresa:', dados.cliente.empresa);
-    console.log('   📅 Vencimento:', dados.cliente.data_vencimento);
-    console.log('   📄 Contrato:', dados.cliente.contrato);
+    console.log('   🆔 CPF (3 primeiros):', dados.cliente.cpf_primeiros_digitos);
     console.log('');
     console.log('⏱️  INFORMAÇÕES DA CHAMADA:');
     console.log('   🕐 Duração:', dados.duracao_segundos, 'segundos');
@@ -125,22 +122,15 @@ function salvarTabulacao(dados) {
     console.log('   ▶️  Início:', dados.inicio);
     console.log('   ⏹️  Fim:', dados.fim);
     console.log('');
-    console.log('✅ RESULTADO DA NEGOCIAÇÃO:');
+    console.log('✅ RESULTADO DA LOCALIZAÇÃO:');
     console.log('   📊 Status:', dados.resultado);
-    
-    if (dados.acordo && dados.acordo.valor) {
-        console.log('');
-        console.log('   💵 ACORDO FECHADO:');
-        console.log('      💰 Valor acordado: R$', dados.acordo.valor);
-        console.log('      📅 Data pagamento:', dados.acordo.data_pagamento);
-        console.log('      🔢 Parcelas:', dados.acordo.parcelas || 'À vista (1x)');
-    }
     
     if (dados.observacoes) {
         console.log('');
         console.log('   📝 Observações:', dados.observacoes);
     }
-        console.log('');
+    
+    console.log('');
     console.log('💰 USO DE TOKENS E CUSTO:');
     console.log('   📥 Input tokens:', dados.tokens.input_tokens);
     console.log('      • Audio:', dados.tokens.input_token_details.audio_tokens);
@@ -151,7 +141,7 @@ function salvarTabulacao(dados) {
     console.log('      • Text:', dados.tokens.output_token_details.text_tokens);
     console.log('');
     
-// Mini
+    // Mini
     const inputCostMini = (dados.tokens.input_tokens / 1000000) * 10;
     const outputCostMini = (dados.tokens.output_tokens / 1000000) * 20;
     const totalCostMini = inputCostMini + outputCostMini;
@@ -161,8 +151,9 @@ function salvarTabulacao(dados) {
     const outputCostFull = (dados.tokens.output_tokens / 1000000) * 64;
     const totalCostFull = inputCostFull + outputCostFull;
     
-    console.log('   💵 CUSTO (gpt-realtime-mini): $' + totalCostMini.toFixed(4), '≈ R$', (totalCostMini * 5).toFixed(2));
-    console.log('   💵 CUSTO (gpt-realtime): $' + totalCostFull.toFixed(4), '≈ R$', (totalCostFull * 5).toFixed(2));
+    console.log('   💵 CUSTO (gpt-4o-mini-realtime): $' + totalCostMini.toFixed(4), '≈ R$', (totalCostMini * 5.8).toFixed(2));
+    console.log('   💵 CUSTO (gpt-4o-realtime): $' + totalCostFull.toFixed(4), '≈ R$', (totalCostFull * 5.8).toFixed(2));
+    console.log('   💡 Economia usando mini:', ((totalCostFull - totalCostMini) / totalCostFull * 100).toFixed(1) + '%');
     console.log('');
     
     console.log('');
@@ -213,8 +204,8 @@ let dadosChamada = {
     fim: null,
     duracao_segundos: 0,
     cliente: {
-        nome: 'João Silva',
-        cpf_primeiros_digitos: '123'
+        nome: 'Paulo Godoy',
+        cpf_primeiros_digitos: '425'
     },
     resultado: 'em_andamento',
     observacoes: '',
@@ -269,20 +260,6 @@ let dadosChamada = {
 
             console.log('Sending session update:', JSON.stringify(sessionUpdate));
             openAiWs.send(JSON.stringify(sessionUpdate));
-
-            // ✨ ADICIONE AQUI - Enviar dados do cliente separadamente:
-    setTimeout(() => {
-        openAiWs.send(JSON.stringify({
-            type: 'conversation.item.create',
-            item: {
-                type: 'message',
-                role: 'system',
-                content: [{
-                    type: 'input_text',
-                    text: `[NOME]=${DADOS_CLIENTE_TESTE.nome},[VALOR]=R$${DADOS_CLIENTE_TESTE.valor},[EMPRESA]=${DADOS_CLIENTE_TESTE.empresa},[DATA]=${DADOS_CLIENTE_TESTE.data}`
-                }]
-            }
-        }));
         
         // Pedir para gerar primeira resposta
         openAiWs.send(JSON.stringify({ type: 'response.create' }));
