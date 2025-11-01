@@ -207,7 +207,7 @@ let dadosChamada = {
         nome: 'Paulo Godoy',
         cpf_primeiros_digitos: '425'
     },
-    resultado: 'em_andamento',
+    resultado: '',
     observacoes: '',
     callSid: null,
     streamSid: null,
