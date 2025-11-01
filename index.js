@@ -261,9 +261,6 @@ let dadosChamada = {
             console.log('Sending session update:', JSON.stringify(sessionUpdate));
             openAiWs.send(JSON.stringify(sessionUpdate));
         
-        // Pedir para gerar primeira resposta
-        openAiWs.send(JSON.stringify({ type: 'response.create' }));
-    }, 100);
 };
 
             // Uncomment the following line to have AI speak first:
