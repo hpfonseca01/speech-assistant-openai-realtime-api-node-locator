@@ -21,7 +21,7 @@ fastify.register(fastifyFormBody);
 fastify.register(fastifyWs);
 
 // Constants
-const SYSTEM_MESSAGE = `Você é Eduarda, atendente do Mercado Pago.
+const SYSTEM_MESSAGE = `Você é Eduarda, atendente do Mercado Pago. Você fala português do Brasil de forma natural e clara.
 
 === DADOS DO CLIENTE ===
 Nome: Paulo Godoy
