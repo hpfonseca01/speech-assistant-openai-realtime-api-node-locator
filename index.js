@@ -130,32 +130,57 @@ function salvarTabulacao(dados) {
     }
     
     console.log('');
-    console.log('💰 USO DE TOKENS E CUSTO:');
-    console.log('   📥 Input tokens:', dados.tokens.input_tokens);
-    console.log('      • Audio:', dados.tokens.input_token_details.audio_tokens);
-    console.log('      • Text:', dados.tokens.input_token_details.text_tokens);
-    console.log('      • Cached:', dados.tokens.input_token_details.cached_tokens, '(economizou!)');
-    console.log('   📤 Output tokens:', dados.tokens.output_tokens);
-    console.log('      • Audio:', dados.tokens.output_token_details.audio_tokens);
-    console.log('      • Text:', dados.tokens.output_token_details.text_tokens);
-    console.log('');
-    
-    // Mini
-    const inputCostMini = (dados.tokens.input_tokens / 1000000) * 10;
-    const outputCostMini = (dados.tokens.output_tokens / 1000000) * 20;
-    const totalCostMini = inputCostMini + outputCostMini;
-    
-    // Completo
-    const inputCostFull = (dados.tokens.input_tokens / 1000000) * 32;
-    const outputCostFull = (dados.tokens.output_tokens / 1000000) * 64;
-    const totalCostFull = inputCostFull + outputCostFull;
-    
-    console.log('   💵 CUSTO (gpt-4o-mini-realtime): $' + totalCostMini.toFixed(4), '≈ R$', (totalCostMini * 5.8).toFixed(2));
-    console.log('   💵 CUSTO (gpt-4o-realtime): $' + totalCostFull.toFixed(4), '≈ R$', (totalCostFull * 5.8).toFixed(2));
-    console.log('   💡 Economia usando mini:', ((totalCostFull - totalCostMini) / totalCostFull * 100).toFixed(1) + '%');
-    console.log('');
-    
-    console.log('');
+console.log('🔥 USO DE TOKENS E CUSTO:');
+console.log('📥 Input tokens:', dados.tokens.input_tokens);
+console.log('  • Audio:', dados.tokens.input_token_details.audio_tokens);
+console.log('  • Text:', dados.tokens.input_token_details.text_tokens);
+console.log('  • Cached:', dados.tokens.input_token_details.cached_tokens, '(economizou!)');
+console.log('📤 Output tokens:', dados.tokens.output_tokens);
+console.log('  • Audio:', dados.tokens.output_token_details.audio_tokens);
+console.log('  • Text:', dados.tokens.output_token_details.text_tokens);
+console.log('');
+
+// 🧾 Cálculo de tokens efetivos
+const inputTokensTotal = dados.tokens.input_tokens;
+const cachedTokens = dados.tokens.input_token_details.cached_tokens || 0;
+const nonCachedTokens = inputTokensTotal - cachedTokens;
+
+// 🧮 Mini
+const inputCostMini = (nonCachedTokens / 1_000_000) * 10;      // input normal
+const cachedCostMini = (cachedTokens / 1_000_000) * 0.30;      // input cacheado
+const outputCostMini = (dados.tokens.output_tokens / 1_000_000) * 20;
+const totalCostMini = inputCostMini + cachedCostMini + outputCostMini;
+
+// 💎 Completo
+const inputCostFull = (nonCachedTokens / 1_000_000) * 30;      // input normal
+const cachedCostFull = (cachedTokens / 1_000_000) * 0.30;      // input cacheado
+const outputCostFull = (dados.tokens.output_tokens / 1_000_000) * 60;
+const totalCostFull = inputCostFull + cachedCostFull + outputCostFull;
+
+// 💰 Conversão pra reais
+const USD_TO_BRL = 5.8;
+const totalCostMiniBRL = totalCostMini * USD_TO_BRL;
+const totalCostFullBRL = totalCostFull * USD_TO_BRL;
+
+// 🧾 Logs
+console.log('💸 CUSTO DETALHADO (gpt-4o-mini-realtime):');
+console.log('  - Input normal:   $', inputCostMini.toFixed(4));
+console.log('  - Input cacheado: $', cachedCostMini.toFixed(4));
+console.log('  - Output:         $', outputCostMini.toFixed(4));
+console.log('  → TOTAL:          $', totalCostMini.toFixed(4), '≈ R$', totalCostMiniBRL.toFixed(2));
+
+console.log('');
+console.log('💎 CUSTO DETALHADO (gpt-4o-realtime):');
+console.log('  - Input normal:   $', inputCostFull.toFixed(4));
+console.log('  - Input cacheado: $', cachedCostFull.toFixed(4));
+console.log('  - Output:         $', outputCostFull.toFixed(4));
+console.log('  → TOTAL:          $', totalCostFull.toFixed(4), '≈ R$', totalCostFullBRL.toFixed(2));
+
+console.log('');
+console.log('📊 Economia usando mini:',
+  ((totalCostFull - totalCostMini) / totalCostFull * 100).toFixed(1) + '%');
+console.log('');
+
     console.log('📄 JSON COMPLETO:');
     console.log(JSON.stringify(dados, null, 2));
     console.log('');
