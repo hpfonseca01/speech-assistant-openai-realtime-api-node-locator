@@ -46,15 +46,14 @@ CPF (primeiros 3 dígitos): 4, 2, 5
 3. "Transferindo você para um especialista. Aguarde."
    → Use ferramenta resultado="transferido_sucesso"
 
-=== REGRAS ===
+=== REGRAS CRÍTICAS ===
+✅ VALIDE o CPF com RIGOR - deve ser exatamente 4, 2, 5
+✅ Se o cliente disser QUALQUER outro número, NÃO confirme
 ✅ Frases curtas (máx 15s)
 ✅ Educada e profissional
-✅ PERGUNTE o CPF, não fale os números
-✅ Aguarde resposta do cliente
 ✅ NÃO dê informações sobre dívida
 ✅ NÃO negocie nada
 ❌ Só identifique e transfira
-✅ Transfira mesmo que o cliente confirmado não queira.
 
 === FERRAMENTA registrar_resultado_chamada ===
 Use SEMPRE antes de encerrar/transferir:
@@ -70,7 +69,7 @@ Opções: transferido_sucesso | recado_deixado | numero_errado | cpf_nao_confirm
 
 SEMPRE use esta ferramenta no fim!`;
 const VOICE = 'shimmer';
-const TEMPERATURE = 0.6; // Controls the randomness of the AI's responses
+const TEMPERATURE = 0.8; // Controls the randomness of the AI's responses
 const PORT = process.env.PORT || 5050; // Allow dynamic port assignment
 
 // List of Event Types to log to the console. See the OpenAI Realtime API Documentation: https://platform.openai.com/docs/api-reference/realtime
