@@ -205,22 +205,21 @@ fastify.register(async (fastify) => {
 // ========================================
         // 📊 DADOS PARA TABULAÇÃO
         // ========================================
-        let dadosChamada = {
-            inicio: new Date().toISOString(),
-            fim: null,
-            duracao_segundos: 0,
-            cliente: {
-                nome: DADOS_CLIENTE_TESTE.nome,
-                valor_divida: DADOS_CLIENTE_TESTE.valor,
-                empresa: DADOS_CLIENTE_TESTE.empresa,
-                data_vencimento: DADOS_CLIENTE_TESTE.data,
-                contrato: DADOS_CLIENTE_TESTE.contrato
-            },
-            resultado: 'em_andamento',
-            acordo: null,
-            observacoes: '',
-            transcricao: [],
-             // ✨ ADICIONE ESTAS LINHAS:
+      // ========================================
+// 📊 DADOS PARA TABULAÇÃO
+// ========================================
+let dadosChamada = {
+    inicio: new Date().toISOString(),
+    fim: null,
+    duracao_segundos: 0,
+    cliente: {
+        nome: 'João Silva',
+        cpf_primeiros_digitos: '123'
+    },
+    resultado: 'em_andamento',
+    observacoes: '',
+    callSid: null,
+    streamSid: null,
     tokens: {
         input_tokens: 0,
         output_tokens: 0,
@@ -234,7 +233,7 @@ fastify.register(async (fastify) => {
             audio_tokens: 0
         }
     }
-        };
+};
         
         let callSid = null;
         
