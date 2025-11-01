@@ -68,7 +68,7 @@ Opções: transferido_sucesso | recado_deixado | numero_errado | cpf_nao_confirm
 
 
 SEMPRE use esta ferramenta no fim!`;
-const VOICE = 'shimmer';
+const VOICE = 'marin';
 const TEMPERATURE = 0.8; // Controls the randomness of the AI's responses
 const PORT = process.env.PORT || 5050; // Allow dynamic port assignment
 
@@ -234,7 +234,7 @@ let dadosChamada = {
         let markQueue = [];
         let responseStartTimestampTwilio = null;
 
-        const openAiWs = new WebSocket(`wss://api.openai.com/v1/realtime?model=gpt-4o-mini-realtime-preview-2024-12-17&temperature=${TEMPERATURE}`, {
+        const openAiWs = new WebSocket(`wss://api.openai.com/v1/realtime?model=gpt-realtime-mini-2025-10-06&temperature=${TEMPERATURE}`, {
             headers: {
                 Authorization: `Bearer ${OPENAI_API_KEY}`,
             }
@@ -246,7 +246,7 @@ let dadosChamada = {
                 type: 'session.update',
                 session: {
                     type: 'realtime',
-                    model: "gpt-4o-mini-realtime-preview-2024-12-17",
+                    model: "gpt-realtime-mini-2025-10-06",
                     output_modalities: ["audio"],
                     audio: {
                         input: { format: { type: 'audio/pcmu' }, turn_detection: { type: "server_vad" } },
