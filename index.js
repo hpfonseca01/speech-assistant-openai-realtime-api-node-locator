@@ -225,7 +225,7 @@ fastify.register(async (fastify) => {
 // 📊 DADOS PARA TABULAÇÃO
 // ========================================
 let dadosChamada = {
-    inicio: new Date().toISOString(),
+    inicio: new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
     fim: null,
     duracao_segundos: 0,
     cliente: {
@@ -537,7 +537,7 @@ console.log('Call SID:', callSid);
         // ========================================
         const fim = new Date();
         const inicio = new Date(dadosChamada.inicio);
-        dadosChamada.fim = fim.toISOString();
+        dadosChamada.fim = fim.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
         dadosChamada.duracao_segundos = Math.floor((fim - inicio) / 1000);
         dadosChamada.callSid = callSid;
         dadosChamada.streamSid = streamSid;
