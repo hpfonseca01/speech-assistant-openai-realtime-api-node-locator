@@ -119,8 +119,8 @@ function salvarTabulacao(dados) {
     console.log('⏱️  INFORMAÇÕES DA CHAMADA:');
     console.log('   🕐 Duração:', dados.duracao_segundos, 'segundos');
     console.log('   🆔 Call SID:', dados.callSid);
-    console.log('   ▶️  Início:', dados.inicio);
-    console.log('   ⏹️  Fim:', dados.fim);
+    console.log('   ▶️  Início:', new Date(dados.inicio).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }));
+console.log('   ⏹️  Fim:', new Date(dados.fim).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }));
     console.log('');
     console.log('✅ RESULTADO DA LOCALIZAÇÃO:');
     console.log('   📊 Status:', dados.resultado);
@@ -225,7 +225,7 @@ fastify.register(async (fastify) => {
 // 📊 DADOS PARA TABULAÇÃO
 // ========================================
 let dadosChamada = {
-    inicio: new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
+    inicio: new Date().toISOString(),
     fim: null,
     duracao_segundos: 0,
     cliente: {
@@ -536,9 +536,9 @@ console.log('Call SID:', callSid);
         // 📊 SALVAR TABULAÇÃO DA CHAMADA
         // ========================================
         const fim = new Date();
-        const inicio = new Date(dadosChamada.inicio);
-        dadosChamada.fim = fim.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
-        dadosChamada.duracao_segundos = Math.floor((fim - inicio) / 1000);
+const inicio = new Date(dadosChamada.inicio);
+dadosChamada.fim = fim.toISOString();
+dadosChamada.duracao_segundos = Math.floor((fim.getTime() - inicio.getTime()) / 1000);
         dadosChamada.callSid = callSid;
         dadosChamada.streamSid = streamSid;
         
