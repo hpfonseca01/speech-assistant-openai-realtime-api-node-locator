@@ -9,6 +9,11 @@ dotenv.config();
 
 // Retrieve the OpenAI API key from environment variables.
 const { OPENAI_API_KEY } = process.env;
+const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
+const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
+const BASE_URL = process.env.WEBSITE_HOSTNAME 
+    ? `https://${process.env.WEBSITE_HOSTNAME}` 
+    : `http://localhost:${process.env.PORT || 5050}`;
 
 if (!OPENAI_API_KEY) {
     console.error('Missing OpenAI API key. Please set it in the .env file.');
@@ -112,7 +117,36 @@ const SHOW_TIMING_MATH = false;
 
 import fs from 'fs';
 import path from 'path';
-
+// ========================================
+// 🎙️ FUNÇÃO PARA INICIAR GRAVAÇÃO VIA API
+// ========================================
+async function iniciarGravacao(callSid) {
+    try {
+        const url = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Calls/${callSid}/Recordings.json`;
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Basic ' + Buffer.from(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`).toString('base64'),
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                'RecordingStatusCallback': `${BASE_URL}/recording-callback`,
+                'RecordingStatusCallbackEvent': 'completed'
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Twilio API error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('✅ Gravação iniciada:', data.sid);
+        return data;
+    } catch (error) {
+        console.error('❌ Erro ao iniciar gravação:', error.message);
+    }
+}
 // Função para salvar tabulação
 function salvarTabulacao(dados) {
     // Salvar arquivo
@@ -150,7 +184,15 @@ console.log('   ⏹️  Fim:', new Date(dados.fim).toLocaleString('pt-BR', { tim
         console.log('');
         console.log('   📝 Observações:', dados.observacoes);
     }
-    
+    // ⬇️ ADICIONAR ESTAS LINHAS:
+if (dados.gravacao && dados.gravacao.recordingUrl) {
+    console.log('');
+    console.log('🎙️  GRAVAÇÃO DA CHAMADA:');
+    console.log('   📼 URL:', dados.gravacao.recordingUrl);
+    console.log('   🆔 Recording SID:', dados.gravacao.recordingSid);
+    console.log('   ⏱️  Duração:', dados.gravacao.recordingDuration, 'segundos');
+}
+ 
     console.log('');
 console.log('🔥 USO DE TOKENS E CUSTO:');
 console.log('📥 Input tokens:', dados.tokens.input_tokens);
@@ -255,6 +297,11 @@ let dadosChamada = {
     },
     resultado: '',
     observacoes: '',
+    gravacao: {  // ⬅️ ADICIONAR ESTE CAMPO
+        recordingUrl: null,
+        recordingSid: null,
+        recordingDuration: null
+    },
     callSid: null,
     streamSid: null,
     tokens: {
@@ -532,6 +579,11 @@ const tools = [
                         console.log('Incoming stream has started', streamSid);
                         callSid = data.start.callSid;
 console.log('Call SID:', callSid);
+                        // Iniciar gravação via API
+    console.log('🎙️ Iniciando gravação da chamada...');
+    iniciarGravacao(callSid).catch(err => 
+        console.error('Erro ao iniciar gravação:', err)
+    );
 
                         // Reset start and media timestamp on a new stream
                         responseStartTimestampTwilio = null; 
@@ -580,7 +632,50 @@ dadosChamada.duracao_segundos = Math.floor((fim.getTime() - inicio.getTime()) / 
         });
     });
 });
-
+// ========================================
+// 🎙️ ENDPOINT PARA RECEBER CALLBACK DE GRAVAÇÃO
+// ========================================
+fastify.post('/recording-callback', async (request, reply) => {
+    try {
+        const { 
+            RecordingUrl, 
+            RecordingSid, 
+            CallSid, 
+            RecordingDuration 
+        } = request.body;
+        
+        console.log('');
+        console.log('🎙️🎙️🎙️ GRAVAÇÃO DISPONÍVEL 🎙️🎙️🎙️');
+        console.log('   📼 URL:', RecordingUrl);
+        console.log('   🆔 Recording SID:', RecordingSid);
+        console.log('   📞 Call SID:', CallSid);
+        console.log('   ⏱️  Duração:', RecordingDuration, 'segundos');
+        console.log('   💾 Download MP3:', RecordingUrl + '.mp3');
+        console.log('');
+        
+        // Salvar em arquivo JSON separado
+        const recordingData = {
+            callSid: CallSid,
+            recordingSid: RecordingSid,
+            recordingUrl: RecordingUrl,
+            recordingUrlMp3: RecordingUrl + '.mp3',
+            duration: RecordingDuration,
+            timestamp: new Date().toISOString()
+        };
+        
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const filename = `gravacao_${CallSid}_${timestamp}.json`;
+        const filepath = path.join('/tmp', filename);
+        
+        fs.writeFileSync(filepath, JSON.stringify(recordingData, null, 2));
+        console.log('✅ Dados da gravação salvos em:', filepath);
+        
+        reply.send({ status: 'ok' });
+    } catch (error) {
+        console.error('❌ Erro no callback de gravação:', error);
+        reply.status(500).send({ error: 'Internal error' });
+    }
+});
 fastify.listen({ port: PORT, host: '0.0.0.0' }, (err, address) => {
     if (err) {
         console.error(err);
