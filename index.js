@@ -84,20 +84,14 @@ Escute a resposta e valide:
 ✅ Se perder o contexto, pergunte: "Desculpe, pode repetir?"
 
 === FERRAMENTA: registrar_resultado_chamada ===
-**OBRIGATÓRIO** usar antes de finalizar toda chamada:
+**OBRIGATÓRIO** usar antes de finalizar toda chamada.
 
-Situações:
-- Localizou e confirmou CPF: resultado="transferido_sucesso"
-- Pessoa errada mas conhece: resultado="recado_deixado", obs="conhece a pessoa"
-- Pessoa errada e não conhece: resultado="numero_errado"
-- CPF incorreto: resultado="cpf_nao_confirmado"
+Parâmetros:
+- resultado: "transferido_sucesso" | "recado_deixado" | "numero_errado" | "cpf_nao_confirmado"
+- obs: (opcional) informação relevante sobre o resultado`;
 
-Opções: transferido_sucesso | recado_deixado | numero_errado | cpf_nao_confirmado
-
-
-SEMPRE use esta ferramenta no fim!`;
 const VOICE = 'marin';
-const TEMPERATURE = 0.8; // Controls the randomness of the AI's responses
+const TEMPERATURE = 1.0; // Controls the randomness of the AI's responses
 const PORT = process.env.PORT || 5050; // Allow dynamic port assignment
 
 // List of Event Types to log to the console. See the OpenAI Realtime API Documentation: https://platform.openai.com/docs/api-reference/realtime
